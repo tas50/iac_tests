@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insecure-web
+  labels:
+    app: insecure-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: insecure-web
+  template:
+    metadata:
+      labels:
+        app: insecure-web
+    spec:
+      containers:
+        - name: web
+          image: nginx:latest # BAD: mutable :latest tag
+          securityContext:
+            privileged: true # BAD: privileged container
+            runAsUser: 0 # BAD: runs as root
+            allowPrivilegeEscalation: true # BAD
+            readOnlyRootFilesystem: false # BAD
+          ports:
+            - containerPort: 80
+          # BAD: no resource limits

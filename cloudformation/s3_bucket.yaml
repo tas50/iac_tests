@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  IaC scanner test template. Contains one insecure and one secure S3 bucket.
+  Do not deploy.
+
+Resources:
+  # BAD: public-read ACL, no encryption, no public access block
+  InsecureBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: iac-tests-cfn-insecure
+      AccessControl: PublicRead
+
+  # GOOD: encrypted, versioned, public access fully blocked
+  SecureBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: iac-tests-cfn-secure
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: aws:kms
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true

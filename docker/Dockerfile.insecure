@@ -1,0 +1,19 @@
+# Intentionally insecure Dockerfile. Do not build/deploy.
+
+# BAD: mutable base tag
+FROM ubuntu:latest
+
+# BAD: runs as root (no USER directive)
+# BAD: adds secret in plain text
+ENV API_KEY="super-secret-key-12345"
+
+RUN apt-get update && apt-get install -y curl
+
+# BAD: pulls and pipes a remote script to a shell
+RUN curl -fsSL http://example.com/install.sh | sh
+
+COPY . /app
+WORKDIR /app
+
+# BAD: no HEALTHCHECK, exposes app as root
+CMD ["./run.sh"]

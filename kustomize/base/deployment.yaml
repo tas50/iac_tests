@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kustomize-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kustomize-web
+  template:
+    metadata:
+      labels:
+        app: kustomize-web
+    spec:
+      containers:
+        - name: web
+          image: nginx:1.27.3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
