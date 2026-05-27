@@ -1,0 +1,36 @@
+---
+# Intentionally insecure Ansible playbook for IaC scanner testing. Do not run.
+- name: Insecure web host setup
+  hosts: web
+  become: true
+  tasks:
+    # BAD: world-writable file permissions
+    - name: Drop config file
+      ansible.builtin.copy:
+        src: app.conf
+        dest: /etc/app/app.conf
+        mode: "0777"
+
+    # BAD: hardcoded plaintext secret
+    - name: Write API key
+      ansible.builtin.lineinfile:
+        path: /etc/app/secrets
+        line: "API_KEY=super-secret-key-12345"
+
+    # BAD: piping a remote script straight to a shell
+    - name: Install tooling
+      ansible.builtin.shell: curl -fsSL http://example.com/install.sh | sh
+
+    # BAD: disables host key checking / TLS validation
+    - name: Fetch artifact
+      ansible.builtin.get_url:
+        url: https://example.com/artifact.tar.gz
+        dest: /tmp/artifact.tar.gz
+        validate_certs: false
+
+    # BAD: ensures SSH password auth is enabled
+    - name: Allow password auth
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        line: "PasswordAuthentication yes"

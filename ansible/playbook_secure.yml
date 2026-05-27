@@ -1,0 +1,47 @@
+---
+# Hardened Ansible playbook counterpart. Should pass a scanner clean.
+- name: Secure web host setup
+  hosts: web
+  become: true
+  tasks:
+    # Restrictive permissions, explicit owner
+    - name: Drop config file
+      ansible.builtin.copy:
+        src: app.conf
+        dest: /etc/app/app.conf
+        owner: app
+        group: app
+        mode: "0640"
+
+    # Secret pulled from an encrypted Ansible Vault variable
+    - name: Write API key
+      ansible.builtin.copy:
+        dest: /etc/app/secrets
+        content: "API_KEY={{ vault_api_key }}"
+        owner: app
+        group: app
+        mode: "0600"
+      no_log: true
+
+    # Verified download over TLS
+    - name: Fetch artifact
+      ansible.builtin.get_url:
+        url: https://example.com/artifact.tar.gz
+        dest: /tmp/artifact.tar.gz
+        checksum: "sha256:{{ artifact_sha256 }}"
+        validate_certs: true
+        mode: "0644"
+
+    # Enforce key-based SSH auth
+    - name: Disable password auth
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "^#?PasswordAuthentication"
+        line: "PasswordAuthentication no"
+      notify: Restart sshd
+
+  handlers:
+    - name: Restart sshd
+      ansible.builtin.service:
+        name: sshd
+        state: restarted

@@ -18,6 +18,7 @@ expectations.
 | `kustomize/`       | Kustomize            | base + prod overlay |
 | `bicep/`           | Azure Bicep          | Storage account |
 | `helm/`            | Helm chart           | Web Deployment + Service |
+| `ansible/`         | Ansible playbook     | Host hardening tasks |
 | `docker/`          | Dockerfile           | Image build hygiene |
 
 ## Convention
